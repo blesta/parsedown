@@ -15,9 +15,9 @@
 
 class Parsedown
 {
-    
+
     private $safeMode = false;
-    
+
     #
     # Philosophy
 
@@ -34,7 +34,7 @@ class Parsedown
     {
         if ($this->safeMode)
             $text = htmlspecialchars($text, ENT_QUOTES, 'UTF-8');
-        
+
         # standardize line breaks
         $text = str_replace("\r\n", "\n", $text);
         $text = str_replace("\r", "\n", $text);
@@ -72,11 +72,11 @@ class Parsedown
 
         return $this;
     }
-    
+
     function setSafeMode($safeMode)
     {
         $this->safeMode = $safeMode;
-        
+
         return $this;
     }
 
@@ -140,7 +140,7 @@ class Parsedown
 
                 continue;
             }
-            
+
             # If line begins with '>' htmlentity, convert to '>' for quoting
             if ($this->safeMode and substr(trim($line), 0, 4) == "&gt;")
             {
@@ -844,7 +844,7 @@ class Parsedown
             {
                 $url = "";
             }
-            
+
             $Definition = array(
                 'id' => strtolower($matches[1]),
                 'data' => array(
@@ -883,7 +883,7 @@ class Parsedown
 
             if (isset($Element['handler']))
             {
-                $markup .= $this->$Element['handler']($Element['text']);
+                $markup .= $this->{$Element['handler']}($Element['text']);
             }
             else
             {
@@ -1245,7 +1245,7 @@ class Parsedown
         {
             $url = "";
         }
-        
+
         if ($excerpt[0] === '!')
         {
             $Element = array(
