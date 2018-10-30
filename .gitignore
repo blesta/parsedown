@@ -1,2 +1,5 @@
 parsedown.komodoproject
 test.php
+composer.lock
+/nbproject/
+/vendor/
