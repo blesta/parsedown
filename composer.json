@@ -1,5 +1,5 @@
 {
-    "name": "erusev/parsedown",
+    "name": "blesta/parsedown",
     "description": "Parser for Markdown.",
     "keywords": ["markdown", "parser"],
     "homepage": "http://parsedown.org",
