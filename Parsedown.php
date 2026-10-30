@@ -941,7 +941,8 @@ class Parsedown
         }
 
         if (preg_match('/\bhttps?:[\/]{2}[^\s<]+\b\/*/ui', $text, $matches, PREG_OFFSET_CAPTURE)) {
-            $url = $matches[0][0];
+            # Remove backslash escapes so the link points to the intended URL
+            $url = preg_replace('/\\\\([[:punct:]])/', '$1', $matches[0][0]);
             if (!$this->safeMode) {
                 $url = str_replace(['&', '<', '>'], ['&amp;', '&lt;', '&gt;'], $url);
             } else if (stripos($url, "javascript:") !== false) {
@@ -1270,6 +1271,22 @@ class Parsedown
         '-',
         '.',
         '!',
+        '"',
+        '$',
+        '%',
+        '&',
+        "'",
+        ',',
+        '/',
+        ':',
+        ';',
+        '<',
+        '=',
+        '?',
+        '@',
+        '^',
+        '|',
+        '~',
     ];
 
     protected $strongRegex = [
