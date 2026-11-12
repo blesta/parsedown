@@ -656,12 +656,7 @@ class Parsedown
 
             $HeaderElements = [];
 
-            $header = $Block['element']['text'];
-
-            $header = trim($header);
-            $header = trim($header, '|');
-
-            $headerCells = explode('|', $header);
+            $headerCells = $this->splitTableRow($Block['element']['text']);
 
             foreach ($headerCells as $index => $headerCell) {
                 $headerCell = trim($headerCell);
@@ -720,12 +715,7 @@ class Parsedown
         if ($Line['text'][0] === '|' or strpos($Line['text'], '|')) {
             $Elements = [];
 
-            $row = $Line['text'];
-
-            $row = trim($row);
-            $row = trim($row, '|');
-
-            $cells = explode('|', $row);
+            $cells = $this->splitTableRow($Line['text']);
 
             foreach ($cells as $index => $cell) {
                 $cell = trim($cell);
@@ -755,6 +745,23 @@ class Parsedown
 
             return $Block;
         }
+    }
+
+    protected function splitTableRow($row)
+    {
+        $row = trim($row);
+
+        if (substr($row, 0, 1) === '|') {
+            $row = substr($row, 1);
+        }
+
+        # Only drop the trailing pipe when it is not escaped (an even number of backslashes precede it)
+        if (preg_match('/(?<!\\\\)(?:\\\\{2})*\|$/', $row)) {
+            $row = substr($row, 0, -1);
+        }
+
+        # Split on unescaped pipes, leaving "\|" in the cell for the escape sequence handler
+        return preg_split('/(?<!\\\\)(?:\\\\{2})*\K\|/', $row);
     }
 
     #
@@ -944,7 +951,7 @@ class Parsedown
             # Remove backslash escapes so the link points to the intended URL
             $url = preg_replace('/\\\\([[:punct:]])/', '$1', $matches[0][0]);
             if (!$this->safeMode) {
-                $url = str_replace(['&', '<', '>'], ['&amp;', '&lt;', '&gt;'], $url);
+                $url = str_replace(['&', '<', '>', '"'], ['&amp;', '&lt;', '&gt;', '&quot;'], $url);
             } else if (stripos($url, "javascript:") !== false) {
                 $url = "";
             }
@@ -994,8 +1001,9 @@ class Parsedown
     protected function identifyEscapeSequence($excerpt)
     {
         if (isset($excerpt[1]) && in_array($excerpt[1], $this->specialCharacters)) {
+            # Safe mode input is already encoded, otherwise encode so escaped markup stays literal
             return [
-                'markup' => $excerpt[1],
+                'markup' => $this->safeMode ? $excerpt[1] : htmlspecialchars($excerpt[1], ENT_NOQUOTES, 'UTF-8'),
                 'extent' => 2,
             ];
         }
