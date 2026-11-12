@@ -949,12 +949,7 @@ class Parsedown
 
         if (preg_match('/\bhttps?:[\/]{2}[^\s<]+\b\/*/ui', $text, $matches, PREG_OFFSET_CAPTURE)) {
             # Remove backslash escapes so the link points to the intended URL
-            $url = preg_replace('/\\\\([[:punct:]])/', '$1', $matches[0][0]);
-            if (!$this->safeMode) {
-                $url = str_replace(['&', '<', '>', '"'], ['&amp;', '&lt;', '&gt;', '&quot;'], $url);
-            } else if (stripos($url, "javascript:") !== false) {
-                $url = "";
-            }
+            $url = $this->encodeUrl(preg_replace('/\\\\([[:punct:]])/', '$1', $matches[0][0]));
 
             return [
                 'extent' => strlen($matches[0][0]),
@@ -1020,12 +1015,7 @@ class Parsedown
     protected function identifyUrlTag($excerpt)
     {
         if (strpos($excerpt, '>') !== false and preg_match('/^<(https?:[\/]{2}[^\s]+?)>/i', $excerpt, $matches)) {
-            $url = $matches[1];
-            if (!$this->safeMode) {
-                $url = str_replace(['&', '<', '>'], ['&amp;', '&lt;', '&gt;'], $url);
-            } else if (stripos($url, "javascript:") !== false) {
-                $url = "";
-            }
+            $url = $this->encodeUrl($matches[1]);
 
             return [
                 'extent' => strlen($matches[0]),
@@ -1128,12 +1118,7 @@ class Parsedown
             return;
         }
 
-        $url = $Link['url'];
-        if (!$this->safeMode) {
-            $url = str_replace(['&', '<', '>'], ['&amp;', '&lt;', '&gt;'], $url);
-        } else if (stripos($url, "javascript:") !== false) {
-            $url = "";
-        }
+        $url = $this->encodeUrl($Link['url']);
 
         if ($excerpt[0] === '!') {
             $Element = [
@@ -1198,6 +1183,26 @@ class Parsedown
         $breakMarker = $this->breaksEnabled ? "\n" : "  \n";
 
         return str_replace($breakMarker, "<br />\n", $text);
+    }
+
+    /**
+     * Prepares a URL for use in an attribute (href or src) and as link text
+     *
+     * Outside of safe mode the input is raw, so characters that would end the
+     * attribute or be read as markup are encoded. In safe mode the input is
+     * already encoded, so only javascript: URLs need to be removed.
+     */
+    protected function encodeUrl($url)
+    {
+        if (!$this->safeMode) {
+            return str_replace(['&', '<', '>', '"'], ['&amp;', '&lt;', '&gt;', '&quot;'], $url);
+        }
+
+        if (stripos($url, 'javascript:') !== false) {
+            return '';
+        }
+
+        return $url;
     }
 
     #
