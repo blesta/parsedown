@@ -5,3 +5,5 @@
 [![MD Logo](http://parsedown.org/md.png)](http://example.com)
 
 [![MD Logo](http://parsedown.org/md.png) and text](http://example.com)
+
+[quoted](http://example.com/a"b)
